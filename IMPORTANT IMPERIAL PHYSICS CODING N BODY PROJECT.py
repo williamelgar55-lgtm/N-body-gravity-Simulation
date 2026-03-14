@@ -1,0 +1,157 @@
+import math
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+fig, ax = plt.subplots()
+ax.set_xlim(-500, 500)
+ax.set_ylim(-500, 500)
+#Imperial project N-body simulator
+preset_choice = int(input("Please choose from the following 3: 1. Two body orbit  2. Figure of eight  3. Three body chaos: "))
+if preset_choice == 1:
+    N_body_1 = {
+        "velocity_1": 0, "velocity_2": 1,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_1", "mass": 1000,
+        "position_1": 100, "position_2": 0,
+        "trail": [], "color": "blue", "display_size": 20
+    }
+    N_body_2 = {
+        "velocity_1": 0, "velocity_2": -1,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_2", "mass": 1000,
+        "position_1": -100, "position_2": 0,
+        "trail": [], "color": "red", "display_size": 20
+    }
+    bodies = [N_body_1, N_body_2]
+
+elif preset_choice == 2:
+    N_body_1 = {
+        "velocity_1": 0.466203685, "velocity_2": 0.43236573,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_1", "mass": 1,
+        "position_1": 0.97000436, "position_2": -0.24308753,
+        "trail": [], "color": "blue", "display_size": 0.1
+    }
+    N_body_2 = {
+        "velocity_1": 0.466203685, "velocity_2": 0.43236573,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_2", "mass": 1,
+        "position_1": -0.97000436, "position_2": 0.24308753,
+        "trail": [], "color": "red", "display_size": 0.1
+    }
+    N_body_3 = {
+        "velocity_1": -0.93240737, "velocity_2": -0.86473146,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_3", "mass": 1,
+        "position_1": 0, "position_2": 0,
+        "trail": [], "color": "green", "display_size": 0.1
+    }
+    bodies = [N_body_1, N_body_2, N_body_3]
+    print(f"Body 1 position: {N_body_1['position_1']}, {N_body_1['position_2']}")
+    print(f"Body 2 position: {N_body_2['position_1']}, {N_body_2['position_2']}")
+    print(f"Body 3 position: {N_body_3['position_1']}, {N_body_3['position_2']}")
+elif preset_choice == 3:
+    N_body_1 = {
+        "velocity_1": 0, "velocity_2": 1,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_1", "mass": 1000,
+        "position_1": 100, "position_2": 0,
+        "trail": [], "color": "blue", "display_size": 20
+    }
+    N_body_2 = {
+        "velocity_1": 0, "velocity_2": -1,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_2", "mass": 1000,
+        "position_1": -100, "position_2": 0,
+        "trail": [], "color": "red", "display_size": 20
+    }
+    N_body_3 = {
+        "velocity_1": 0, "velocity_2": 1,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_3", "mass": 1000,
+        "position_1": 0, "position_2": 200,
+        "trail": [], "color": "green", "display_size": 20
+    }
+    bodies = [N_body_1, N_body_2, N_body_3]
+def on_click(event):
+    if event.xdata is None:
+        return
+    new_body = {
+        "velocity_1": 0, "velocity_2": 0,
+        "force_1": 0, "force_2": 0,
+        "accleration_1": 0, "accleration_2": 0,
+        "name": "body_new",
+        "mass": 1000,
+        "position_1": event.xdata,
+        "position_2": event.ydata,
+        "trail": [],
+        "color": "purple",
+        "display_size": 20
+    }
+    bodies.append(new_body)
+
+fig.canvas.mpl_connect('button_press_event', on_click)
+def update(frame):
+    global preset_choice
+    G = 1
+    if preset_choice == 2:
+        dt = 0.01
+        min_dist = 0.1
+    else:
+        dt = 0.5
+        min_dist = 10
+    total_energy = 0
+    for i in bodies:
+        i["force_1"] = 0
+        i["force_2"] = 0
+    for i in bodies:
+        for j in bodies:
+            if i != j:
+                dx = i["position_1"] - j["position_1"]
+                dy = i["position_2"] - j["position_2"]
+                square_root = math.sqrt(dx**2 + dy**2)
+                if square_root < min_dist:
+                    continue
+                force_magnitude_calculation = (G * i["mass"] * j["mass"])/(square_root**2)
+                potential_energy = -G * i["mass"] * j["mass"] / square_root
+                total_energy += potential_energy / 2
+                angle = math.atan2(dy, dx)
+                force_x = force_magnitude_calculation * math.cos(angle)
+                force_y = force_magnitude_calculation * math.sin(angle)
+                i["force_1"] -= force_x
+                i["force_2"] -= force_y
+    for i in bodies:
+         old_acc_1 = i["accleration_1"]
+         old_acc_2 = i["accleration_2"]
+         i["accleration_1"] = i["force_1"] / i["mass"]
+         i["accleration_2"] = i["force_2"] / i["mass"]
+         i["velocity_1"] += 0.5 * (old_acc_1 + i["accleration_1"]) * dt
+         i["velocity_2"] += 0.5 * (old_acc_2 + i["accleration_2"]) * dt
+         kinetic_energy = 0.5 * i["mass"] * (i["velocity_1"]**2 + i["velocity_2"]**2)
+         total_energy += kinetic_energy
+         i["position_1"] += i["velocity_1"] * dt + 0.5 * i["accleration_1"] * dt**2
+         i["position_2"] += i["velocity_2"] * dt + 0.5 * i["accleration_2"] * dt**2
+         
+    ax.cla()
+    if preset_choice == 2:
+     ax.set_xlim(-1.5, 1.5)
+     ax.set_ylim(-1.5, 1.5) 
+    else:
+        ax.set_xlim(-500, 500)
+        ax.set_ylim(-500, 500)
+    ax.text(-490, 470, f"Total Energy: {total_energy:.2f}", fontsize=12, color="blue")
+    for i in bodies:
+        i["trail"].append((i["position_1"], i["position_2"]))
+        ax.plot(i["position_1"], i["position_2"], "o", color=i["color"])
+        for point in i["trail"]:
+            ax.plot(point[0], point[1], ",", color=i["color"])
+
+ani = FuncAnimation(fig, update, interval=20, cache_frame_data=False)
+plt.show()
